@@ -211,13 +211,25 @@ boost::optional<std::string> getCertificateSubjectAltNames(X509* cert) {
       continue;
     }
 
-    // Separate on what has actually been written, so a name that could not be
-    // printed does not leave a stray separator behind
+    auto unique_tmp_bio = createUniqueBIO();
+    if (unique_tmp_bio == nullptr) {
+      continue;
+    }
+
+    if (GENERAL_NAME_print(unique_tmp_bio.get(), general_name) == 0) {
+      continue;
+    }
+
+    auto opt_printed = getMemoryBackedBIOContentsAsString(unique_tmp_bio.get());
+    if (!opt_printed.has_value() || opt_printed->empty()) {
+      continue;
+    }
+
     if (BIO_pending(unique_mem_bio.get()) != 0) {
       BIO_puts(unique_mem_bio.get(), ", ");
     }
 
-    GENERAL_NAME_print(unique_mem_bio.get(), general_name);
+    BIO_puts(unique_mem_bio.get(), opt_printed->c_str());
   }
 
   return getMemoryBackedBIOContentsAsString(unique_mem_bio.get());
