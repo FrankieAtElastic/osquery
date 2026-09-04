@@ -35,7 +35,7 @@ schema([
     Column("pem", TEXT, "Certificate PEM format"),
     Column("tls_version", TEXT, "TLS protocol version negotiated for the connection; empty if the handshake did not complete"),
     Column("cipher_suite", TEXT, "IANA name of the cipher suite negotiated for the connection; empty if the handshake did not complete"),
-    Column("cipher_bits", INTEGER, "Bits of security provided by the negotiated cipher suite")
+    Column("cipher_bits", INTEGER, "Number of secret/key bits used by the negotiated cipher suite; NULL if the handshake did not complete")
 ])
 implementation("curl_certificate@genTLSCertificate")
 examples([
